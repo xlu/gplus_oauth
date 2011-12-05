@@ -1,0 +1,5 @@
+development:
+  oauth_scopes: 'https://www.googleapis.com/auth/plus.me'
+  oauth_client_id: # <your own client id> from https://code.google.com/apis/console
+  oauth_client_secret: # <your own client secret> from https://code.google.com/apis/console
+  google_api_key: # <your own api key> from https://code.google.com/apis/console
