@@ -2,4 +2,65 @@
   <div id class="inner">
     <h1>Select the Photos to be Imported</h1>
   </div>
+
+<div class="largerbox">
+  <p>Your OAuth 2.0 token is in the rack session.</p>
+
+  <p class="logout"><a href="clearsession">Logout</a> by deleting this token.</p>
+
+  <section class="activity">
+      <h3>A Specific Public Activity</h3>
+      <dl>
+          <dt>ID</dt>
+          <dd>
+              <a href=<%=@public_activity['url']%>><%=@public_activity['id']%></a>
+          </dd>
+          <dt>Content</dt>
+          <dd>
+              <%=@public_activity['object']['content']%>
+          </dd>
+      </dl>
+  </section>
+</div>
+<div class="box">
+  <section class="me">
+    <h3>Your Profile</h3>
+    <dl>
+      <dt>Image</dt>
+      <dd>
+        <%= link_to image_tag(h @profile['image']['url']), @profile['url'] %>
+      </a>
+      </dd>
+      <dt>ID</dt>
+      <dd><%=@profile['id']%></dd>
+      <dt>Name</dt>
+      <dd><a href=<%=@profile['url']%>><%=@profile['displayName']%></a>
+      </dd>
+    </dl>
+  </section>
+</div>
+
+<div class="largerbox">
+  <section class="activity">
+    <h3>Your Public Activity</h3>
+    <table>
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Content</th>
+      </tr>
+      </thead>
+      <tbody>
+        <% @activities['items'].each { |i|
+        # Print the Person ID, their name
+        %>
+          <tr><td><a href=<%=i['url']%>><%=i['id']%></td>
+          <td><%=i['object']['content']%></td></tr>
+        <%} %>
+      </tbody>
+    </table>
+  </section>
+</div>
+
+
 </div>
