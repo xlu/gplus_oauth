@@ -1,6 +1,8 @@
 require 'google/api_client'
 require 'httpadapter/adapters/net_http'
+require 'pp'
 
+use Rack::Session::Pool, :expire_after => 86400 # 1 day
 
 class TokenPair
   @refresh_token
@@ -27,73 +29,49 @@ end
 
 class GplusController < ApplicationController
 
-
-
 def login
   @client = get_client()
   if session[:token]
     puts "session[:token]=#{session[:token]}"
     # Load the access token here if it's available
     @client.authorization.update_token!(session[:token].to_hash)
-  else
-    puts "session[:token]=null"
   end
 
   @plus = @client.discovered_api('plus', 'v1')
   puts "token=#{@client.authorization.access_token}"
   puts "request.path_info=#{request.path_info}"
 
-  @login_url = @client.authorization.authorization_uri.to_s
-=begin #TODO what to do when user revisit login page without logout
-  unless @client.authorization.access_token || request.path_info =~ /^\/oauth2/
-    @login_url = @client.authorization.authorization_uri.to_s
-  else
-    # ask user to logout? or
-    redirect_to "/import?#{@client.authorization.code}"
-  end
-=end
+  @login_url = @client.authorization.authorization_uri.to_s  #TODO user revisits login page without logout
 end
 
   def import
-    @client = get_client(params[:code])
     #http://localhost:3000/import?code=4/Afm3oTPtuOtWFXbOdSnGS290fKq5
+    @client = get_client(params[:code])
     @client.authorization.fetch_access_token!
 
     if session[:token]
-      puts "import: session[:token]=#{session[:token]}"
       # Load the access token here if it's available
       @client.authorization.update_token!(session[:token].to_hash)
     else
-      puts "import: session[:token]=null"
       token_pair = TokenPair.new
       token_pair.update_token!(@client.authorization)
       # Persist the token here
-      session[:token] = token_pair.to_hash #xlu add to_hash
+      session[:token] = token_pair.to_hash
       p token_pair
     end
 
     @plus = @client.discovered_api('plus', 'v1')
 
     # Fetch a known public activity
-    status = @client.execute(
-      @plus.activities.get,
-      'activityId' => 'z12ydv2rbtv4drryr04cj1u4hsa3gdwy1h4'
-    )
+    status = fetch_one_public_activity(@client, @plus, 'z12ydv2rbtv4drryr04cj1u4hsa3gdwy1h4')
     @public_activity = JSON.parse(status.body)
 
     # Fetch my profile
-    status = @client.execute(
-      @plus.people.get,
-      'userId' => 'me'
-    )
+    status = fetch_my_profile(@client, @plus)
     @profile = JSON.parse(status.body)
-    puts "#{@profile.to_s}"
 
     # Fetch my activities
-    status = @client.execute(
-      @plus.activities.list,
-      'userId' => 'me', 'collection' => 'public'
-    )
+    status = fetch_my_public_activity(@client, @plus)
     @activities = JSON.parse(status.body)
   end
 
@@ -101,7 +79,39 @@ end
 
   end
 
+  # Clears the token saved in the session
+  def clear_session
+    session.delete(:token)
+    redirect to('/')
+  end
+
 private
+
+  def fetch_one_public_activity(client, gplus, activity_id)
+    # Fetch a known public activity
+    status = client.execute(
+      gplus.activities.get,
+      'activityId' => activity_id
+    )
+    return status
+  end
+
+  def fetch_my_profile(client, gplus)
+    status = client.execute(
+      gplus.people.get,
+      'userId' => 'me'
+    )
+    return status
+  end
+
+  def fetch_my_public_activity(client, gplus)
+    status = client.execute(
+      gplus.activities.list,
+      'userId' => 'me', 'collection' => 'public'
+    )
+    return status
+  end
+
   def get_client(code = nil)
     set :oauth_scopes, 'https://www.googleapis.com/auth/plus.me'
     set :oauth_client_id, "26284077240-75n7qg3ea5blsf745fas7lf0jj3esc0e.apps.googleusercontent.com"
@@ -117,7 +127,7 @@ private
     client.authorization.client_id = settings.oauth_client_id
     client.authorization.client_secret = settings.oauth_client_secret
     client.authorization.scope = settings.oauth_scopes
-    client.authorization.redirect_uri = 'http://localhost:3000/import'#to('/oauth2callback')
+    client.authorization.redirect_uri = 'http://localhost:3000/import' #match gplus callback url
     client.authorization.code = code if code
     return client
   end
