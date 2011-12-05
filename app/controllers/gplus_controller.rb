@@ -1,4 +1,6 @@
 require 'google/api_client'
+require 'httpadapter/adapters/net_http'
+
 
 class TokenPair
   @refresh_token
