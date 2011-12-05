@@ -17,6 +17,12 @@ group :assets do
 end
 
 gem 'jquery-rails'
+# xlu add for gplus TODO need to verify whether all of below are needed
+gem 'google-api-client'
+gem 'sinatra'
+gem 'httpadapter'
+gem 'extlib'
+gem 'dm-sqlite-adapter'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
@@ -29,6 +35,13 @@ gem 'jquery-rails'
 
 # To use debugger
 # gem 'ruby-debug19', :require => 'ruby-debug'
+
+
+group :development do
+  gem 'ruby-debug-base19'
+  gem 'ruby-debug19', :require => 'ruby-debug'
+end
+
 
 group :test do
   # Pretty printed test output
