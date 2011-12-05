@@ -12,13 +12,11 @@ app/controllers/gplus_controller.rb
   import: take oauth resulting code and retrieve user info
   clear_session: clear session
 
-
 app/assets/stylesheets
   application.css
     add style for page title
   gplus.css.scss
     add style for viewing user gplus data
-
 
 app/views/gplus
   login.html.erb
@@ -27,4 +25,11 @@ app/views/gplus
     display user info after user oauth login successful
   list.html.erb
 
+
+How to use this project:
+1) Start rails server
+2) Go to http://localhost:3000/login
+   click "Connect Me!"
+3) Sign in with desired google username and password
+4) You will be redirected to http://localhost:3000/import page and the user profile and posts info for user specified in step3 will be displayed.
 
