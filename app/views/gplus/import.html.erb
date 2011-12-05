@@ -5,7 +5,6 @@
 
 <div class="largerbox">
   <p>Your OAuth 2.0 token is in the rack session.</p>
-
   <p class="logout"><a href="clearsession">Logout</a> by deleting this token.</p>
 
   <section class="activity">
@@ -17,11 +16,12 @@
           </dd>
           <dt>Content</dt>
           <dd>
-              <%=@public_activity['object']['content']%>
+              <%=@public_activity['object']['content'] %>
           </dd>
       </dl>
   </section>
 </div>
+
 <div class="box">
   <section class="me">
     <h3>Your Profile</h3>
