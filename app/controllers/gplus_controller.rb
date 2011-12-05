@@ -1,6 +1,7 @@
 require 'google/api_client'
 require 'httpadapter/adapters/net_http'
 require 'pp'
+require 'yaml'
 
 use Rack::Session::Pool, :expire_after => 86400 # 1 day
 
@@ -112,11 +113,23 @@ private
     return status
   end
 
+  def read_oauth_config
+    gplus_config_filename = File.join(Rails.root, "config", "gplus.yml")
+    raise "#{ga_config_filename} does not exist." unless File.exists?(gplus_config_filename)
+    yaml = File.open(gplus_config_filename) {|yf| YAML::load(yf) }
+    env = Rails.env
+    oauth_scopes = yaml[env]["oauth_scopes"]
+    oauth_client_id = yaml[env]["oauth_client_id"]
+    oauth_client_secret = yaml[env]["oauth_client_secret"]
+    google_api_key = yaml[env]["google_api_key"]
+    return oauth_scopes, oauth_client_id, oauth_client_secret, google_api_key
+  end
   def get_client(code = nil)
-    set :oauth_scopes, 'https://www.googleapis.com/auth/plus.me'
-    set :oauth_client_id, "26284077240-75n7qg3ea5blsf745fas7lf0jj3esc0e.apps.googleusercontent.com"
-    set :oauth_client_secret, "cDojVWm5euvqv1JzUBW4kpHu"
-    set :google_api_key, "AIzaSyCSrkhMfLkmIY_jXVnoyR6JwLhNmG1JxCQ"
+    oauth_scopes, oauth_client_id, oauth_client_secret, google_api_key = read_oauth_config
+    set :oauth_scopes, oauth_scopes
+    set :oauth_client_id, oauth_client_id
+    set :oauth_client_secret, oauth_client_secret
+    set :google_api_key, google_api_key
 
     client = Google::APIClient.new(
       :authorization => :oauth_2,
@@ -127,7 +140,7 @@ private
     client.authorization.client_id = settings.oauth_client_id
     client.authorization.client_secret = settings.oauth_client_secret
     client.authorization.scope = settings.oauth_scopes
-    client.authorization.redirect_uri = 'http://localhost:3000/import' #match gplus callback url
+    client.authorization.redirect_uri = "http://#{request.host_with_port}/import"  #match gplus callback url
     client.authorization.code = code if code
     return client
   end
