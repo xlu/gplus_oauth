@@ -58,4 +58,5 @@ Gplus::Application.routes.draw do
   match 'login' => 'gplus#login'
   match 'import' => 'gplus#import'
   match 'list' => 'gplus#list'
+  match 'clearsession' => 'gplus#clear_session'
 end
