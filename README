@@ -27,9 +27,10 @@ app/views/gplus
 
 
 How to use this project:
-1) Start rails server
-2) Go to http://localhost:3000/login
+1) config/gplus.yml file, enter your own Client ID, Client secret, Reidrect url (you can use http://localhost:3000/import" to get this project running, API key from https://code.google.com/apis/console
+2) Start rails server
+3) Go to http://localhost:3000/login
    click "Connect Me!"
-3) Sign in with desired google username and password
-4) You will be redirected to http://localhost:3000/import page and the user profile and posts info for user specified in step3 will be displayed.
+4) Sign in with desired google username and password
+5) You will be redirected to http://localhost:3000/import page and the user profile and posts info for user specified in step3 will be displayed.
 
