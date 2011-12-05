@@ -2,4 +2,9 @@
   <div id class="inner">
     <h1>Import Google+ Photos</h1>
   </div>
+<%
+   if @login_url %>
+  <a class='login' href=<%=@login_url%>>Connect Me!</a>
+<% end %>
+
 </div>
