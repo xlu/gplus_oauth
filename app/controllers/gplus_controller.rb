@@ -5,45 +5,45 @@ require 'yaml'
 
 use Rack::Session::Pool, :expire_after => 86400 # 1 day
 
-class TokenPair
-  @refresh_token
-  @access_token
-  @expires_in
-  @issued_at
-
-  def update_token!(object)
-    @refresh_token = object.refresh_token
-    @access_token = object.access_token
-    @expires_in = object.expires_in
-    @issued_at = object.issued_at
-  end
-
-  def to_hash
-    return {
-      :refresh_token => @refresh_token,
-      :access_token => @access_token,
-      :expires_in => @expires_in,
-      :issued_at => Time.at(@issued_at)
-    }
-  end
-end
-
 class GplusController < ApplicationController
 
-def login
-  @client = get_client()
-  if session[:token]
-    puts "session[:token]=#{session[:token]}"
-    # Load the access token here if it's available
-    @client.authorization.update_token!(session[:token].to_hash)
+  class TokenPair
+    @refresh_token
+    @access_token
+    @expires_in
+    @issued_at
+
+    def update_token!(object)
+      @refresh_token = object.refresh_token
+      @access_token = object.access_token
+      @expires_in = object.expires_in
+      @issued_at = object.issued_at
+    end
+
+    def to_hash
+      return {
+        :refresh_token => @refresh_token,
+        :access_token => @access_token,
+        :expires_in => @expires_in,
+        :issued_at => Time.at(@issued_at)
+      }
+    end
   end
 
-  @plus = @client.discovered_api('plus', 'v1')
-  puts "token=#{@client.authorization.access_token}"
-  puts "request.path_info=#{request.path_info}"
+  def login
+    @client = get_client()
+    if session[:token]
+      puts "session[:token]=#{session[:token]}"
+      # Load the access token here if it's available
+      @client.authorization.update_token!(session[:token].to_hash)
+    end
 
-  @login_url = @client.authorization.authorization_uri.to_s  #TODO user revisits login page without logout
-end
+    @plus = @client.discovered_api('plus', 'v1')
+    puts "token=#{@client.authorization.access_token}"
+    puts "request.path_info=#{request.path_info}"
+
+    @login_url = @client.authorization.authorization_uri.to_s  #TODO user revisits login page without logout
+  end
 
   def import
     #http://localhost:3000/import?code=4/Afm3oTPtuOtWFXbOdSnGS290fKq5
@@ -124,6 +124,7 @@ private
     google_api_key = yaml[env]["google_api_key"]
     return oauth_scopes, oauth_client_id, oauth_client_secret, google_api_key
   end
+
   def get_client(code = nil)
     oauth_scopes, oauth_client_id, oauth_client_secret, google_api_key = read_oauth_config
     set :oauth_scopes, oauth_scopes
