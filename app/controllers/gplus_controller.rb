@@ -31,18 +31,19 @@ class GplusController < ApplicationController
   end
 
   def login
-    @client = get_client()
-    if session[:token]
-      puts "session[:token]=#{session[:token]}"
-      # Load the access token here if it's available
-      @client.authorization.update_token!(session[:token].to_hash)
+    begin
+      @client = get_client()
+      if session[:token]
+        # Load the access token here if it's available
+        @client.authorization.update_token!(session[:token].to_hash)
+      end
+
+      @plus = @client.discovered_api('plus', 'v1')
+
+      @login_url = @client.authorization.authorization_uri.to_s  #TODO user revisits login page without logout
+    rescue => e
+      render :text => "Login ERROR: #{e.message}"
     end
-
-    @plus = @client.discovered_api('plus', 'v1')
-    puts "token=#{@client.authorization.access_token}"
-    puts "request.path_info=#{request.path_info}"
-
-    @login_url = @client.authorization.authorization_uri.to_s  #TODO user revisits login page without logout
   end
 
   def import
@@ -122,6 +123,11 @@ private
     oauth_client_id = yaml[env]["oauth_client_id"]
     oauth_client_secret = yaml[env]["oauth_client_secret"]
     google_api_key = yaml[env]["google_api_key"]
+    raise "gplus.yml missing configuration for oauth_scopes" if oauth_scopes.blank?
+    raise "gplus.yml missing configuration for oauth_client_id" if oauth_client_id.blank?
+    raise "gplus.yml missing configuration for oauth_client_secret" if oauth_client_secret.blank?
+    raise "gplus.yml missing configuration for google_api_key" if google_api_key.blank?
+
     return oauth_scopes, oauth_client_id, oauth_client_secret, google_api_key
   end
 
